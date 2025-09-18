@@ -2,14 +2,14 @@
 
 
 {% block content %}
-  
+
   <div class="col-sm col-md-8 col-lg-9 col-12">
       <h5>
           <a href="/search?search_term={{ tab.artist_name }}">{{ tab.artist_name }}</a> - {{ tab.song_name }} (ver {{tab.version }})
           <span title="add/remove song to/from favs" class="favorite m-2 d-print-none" data-artist="{{tab.artist_name}}" data-song="{{tab.song_name}}" data-type="{{tab._type}}" data-rating="{{tab.rating}}" data-url="{{ request.path }}">★</span>
       </h5>
   </div>
-      
+
   <div class="col-sm col-md-4 col-lg-3">
      View on <a class="d-print-none" href="{{ tab.tab_url }}?no_redirect">Ultimate Guitar</a>
   </div>
@@ -19,21 +19,21 @@
   </div>
 
   <div class="col-sm col-md-3 col-lg-3">
-      Capo: 
+      Capo:
       {% if tab.capo %}
           {{ tab.capo -}} th fret
       {% else %}
           no capo
       {% endif %}
   </div>
-  
+
   <div class="col-sm col-lg-12">
      {% if tab.tuning %}
          Tuning: {{ tab.tuning }}<br>
      {% endif %}
   </div>
-    
-    
+
+
   <div class="d-flex align-items-center d-print-none flex-wrap">
       <div class="form-check form-switch autoscroll me-4">
           <input class="form-check-input" type="checkbox" role="switch" id="checkbox_autoscroll" />
@@ -42,12 +42,14 @@
           <span id="scroll_speed" style="min-width: 0.5rem;" class="d-inline-block font-monospace"></span>
           <span role="button" id="scroll_speed_up" title="increase scroll speed" class="me-2" >❯❯</span>
       </div>
-      
+
+      <!--
       <div class="form-check form-switch me-4">
           <input class="form-check-input" type="checkbox" role="switch" id="checkbox_view_chords"/>
           <label class="form-check-label" for="checkbox_view_chords">Show chords</label>
       </div>
-   
+      -->
+
       <div>
           <span class="">Transpose </span>
           <span role="button" id="transpose_down" title="transpose down" class="m-2">↓</span>
@@ -60,6 +62,21 @@
           <span role="button" id="columns_down" title="remove column" class="m-2">-</span>
       </div>
   </div>
+
+      <div class="StickyChords">
+      <details>
+        <summary>Guitar Chords</summary>
+        <div id="guitar" style="display: flex;flex-wrap: wrap;"></div>
+      </details>
+      <details>
+        <summary>Ukelele Chords</summary>
+        <div id="uke" style="display: flex;flex-wrap: wrap;"></div>
+      </details>
+      <details>
+        <summary>Baritone Uke Chords</summary>
+        <div id="bariuke" style="display: flex;flex-wrap: wrap;"></div>
+      </details>
+    </div>
 
     <hr class="border border-primary"/>
     <div id="chordVisuals" style="display: none;">
@@ -98,8 +115,10 @@
     </div>
 
     <div class="tab font-monospace">
-        {{ tab.tab | safe }} 
+        {{ tab.tab | safe }}
     </div>
+
+    <div id="ChordLyricOutput"></div>
 
     {% if tab.alternatives %}
     <div class="d-print-none mt-4">
@@ -116,7 +135,49 @@
 
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    function updateChords() {
+
+     const els = document.getElementsByClassName("tab");
+
+
+    if (els.length > 0) {
+      // Highlight chords in lyrics
+      const innerText = els[0].innerText;
+      text = structuredClone(innerText).replaceAll('\u00A0', ' ');
+      const container = document.createElement("div");
+      chordLyrics.generateLyricSheet(text,container)
+      els[0].style.height = "0px";
+      els[0].style.overflow = "hidden";
+      document.getElementById("ChordLyricOutput").innerHTML = "";
+      document.getElementById("ChordLyricOutput").append(container);
+
+      const chords = chordLyrics.uniqueChords(text.replaceAll('\u00A0', ' '));
+
+      const instruments = ["guitar","uke","bariuke"];
+
+      instruments.map((inst) => {
+
+        const mountPoint = document.getElementById(inst);
+        mountPoint.innerHTML = "";
+        chords.map((chord) => {
+          const chordDetails = chordLyrics.validateChord({findChord: chord, instrument: inst});
+          if (!chordDetails) {
+            return
+          }
+          const svgBody = chordLyrics.Chord({chord: chordDetails, instrument: inst === "guitar" ? chordLyrics.instruments.guitar : chordLyrics.instruments.ukulele, lite: true});
+          const svgElement = document.createElement("div");
+          svgElement.classList = ["ChordDiagram"]
+          svgElement.innerHTML = svgBody;
+          svgElement.innerHTML += `<div style="color: yellow;font-size: 1.5em;font-weight: bolder;">${chord}</div>`;
+          mountPoint.append(svgElement)
+        })
+      })
+
+    };
+
+    }
+
+    $(document).ready(function () {
 
         const favorites = JSON.parse(localStorage.getItem("favorites")) || {};
         if (window.location.pathname in favorites) {
@@ -125,6 +186,8 @@
                 el.style.color = "#ffae00";
             });
         }
+
+        updateChords();
 
     });
 

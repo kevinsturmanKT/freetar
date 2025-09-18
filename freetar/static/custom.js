@@ -157,6 +157,7 @@ function initialise_transpose() {
                 }
             }
         });
+                updateChords()
     }
 
     // Defines a list of notes, grouped with any alternate names (like D# and Eb)

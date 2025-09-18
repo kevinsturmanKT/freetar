@@ -23,20 +23,89 @@
 
 
   <link href="/static/bootstrap/bootstrap.min.css" rel="stylesheet">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+  <script src="/static/chordLyrics.js"></script>
   <title>{{ title or "Freetar - guitar chords from Ultimate Guitar" }}</title>
   <link rel="icon" type="image/png" href="/static/guitar.png" />
   <script>
-    let isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (JSON.parse(localStorage.getItem("dark_mode")) || isDarkMode)
       document.documentElement.setAttribute('data-bs-theme', 'dark')
   </script>
+<style>
+:root {
+    --chordlyrics-space-s: .3em;
+    --chordlyrics-space-m: calc(1.3 * var(--chordlyrics-space-s));
+    --chordlyrics-space-l: calc(2 * var(--chordlyrics-space-m));
+    --chordlyrics-chord-color: #ffb86c;
+}
+
+    .ChordDiagram {
+      width: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .StickyChords {
+      position: sticky;
+      top: 0;
+      background: #32383e;
+    }
+
+.chordlyrics-root {
+    white-space: pre;
+    display: flex;
+    row-gap: var(--chordlyrics-space-s);
+    flex-direction: column;
+    font-family: monospace;
+    /* padding: var(--chordlyrics-space-l) !important; */
+    margin-top: 0.5em;
+    overflow: hidden;
+}
+
+.chordlyrics-line {
+    display: flex;
+    margin: 0 var(--chordlyrics-space-l);
+    flex-wrap: wrap;
+    row-gap: var(--chordlyrics-space-l);
+    min-height: 1em;
+}
+
+.chordlyrics-header {
+    --shift: calc(-1 * var(--chordlyrics-space-l));
+    --shift-adjust: calc(2 * var(--shift));
+    padding: var(--chordlyrics-space-m) var(--chordlyrics-space-l);
+    text-align: left;
+    width: 150%;
+    font-size: 1.1em;
+    background-color: #444 !important;
+    color: white !important;
+}
+
+.chordlyrics-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--chordlyrics-space-s);
+}
+
+.chordlyrics-chord {
+    color: var(--chordlyrics-chord-color, var(--strong-color, var(--accent-strong, var(--bold-color)))) !important;
+    line-height: 1;
+    font-weight: 1000;
+}
+
+.chordlyrics-word {
+    line-height: 100%;
+    color: var(--chordlyrics-lyrics-color, inherit) !important;
+}
+</style>
 </head>
 
 <body>
 
   <nav class="mb-2 navbar navbar-expand-lg bg-body-tertiary d-print-none">
     <div class="container d-flex" style="flex-wrap: nowrap;">
-      <a class="navbar-brand" href="/">Freetar</a>
+      <a class="navbar-brand" href="/">Freetar - <span style="color: yellow;font-size: 0.75em;font-style: italic;">Kevlar edition</span></a>
       <form class="d-flex w-50" method="GET" action="/search">
           {% if search_term %}
             <input required class="form-control me-2" name="search_term" type="search" value="{{ search_term }}" aria-label="Search">
@@ -53,9 +122,6 @@
         </li>
         <li class="nav-item ms-4">
           <a class="nav-link">
-            <span role="button" title="enable/disable dark mode" id="dark_mode">
-              🌓︎
-            </span></a>
         </li>
       </ul>
     </div>

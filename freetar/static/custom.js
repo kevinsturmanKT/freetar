@@ -141,6 +141,7 @@ function initialise_transpose() {
                 transposedSteps.show()
             }
         });
+                updateChords()
     }
 
     // Defines a list of notes, grouped with any alternate names (like D# and Eb)

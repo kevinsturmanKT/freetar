@@ -122,12 +122,16 @@ function initialise_transpose() {
         transpose()
     });
 
+
+
     $('.tab').find('.chord-root, .chord-bass').each(function () {
         const text = $(this).text()
         $(this).attr('data-original', text)
     })
 
     function transpose() {
+        // Hack for safari. Height needs to be auto when reading hidden .tab
+        $(".tab").css("height","auto");
         $('.tab').find('.chord-root, .chord-bass').each(function () {
             const originalText = $(this).attr('data-original')
             const transposedSteps = $('#transposed_steps')

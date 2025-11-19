@@ -134,20 +134,33 @@ function initialise_transpose() {
         transpose()
     });
 
-    document.querySelectorAll(".tab .chord-root, .tab .chord-bass").forEach((el) => {
-        const text = el.textContent;
-        el.setAttribute("data-original", text);
-    });
+    $('.tab').find('.chord-root, .chord-bass').each(function () {
+        const text = $(this).text()
+        $(this).attr('data-original', text)
+    })
 
     function transpose() {
-        document.querySelectorAll(".tab .chord-root, .tab .chord-bass").forEach((el) => {
-            const originalText = el.getAttribute("data-original");
-            const transposedSteps = document.getElementById("transposed_steps");
+        // Hack for safari. Height needs to be auto when reading hidden .tab
+        $(".tab").css("height","auto");
+        $('.tab').find('.chord-root, .chord-bass').each(function () {
+            const originalText = $(this).attr('data-original')
+            const transposedSteps = $('#transposed_steps')
             if (transpose_value === 0) {
-                el.textContent = originalText;
+                $(this).text(originalText);
                 if (transposedSteps) {
-                    transposedSteps.style.display = "none";
+                    transposedSteps[0].style.display = "none";
                 }
+            } else {
+                const new_text = transpose_note(originalText.trim(), transpose_value);
+                $(this).text(new_text);
+                if (transposedSteps) {
+                    transposedSteps.text((transpose_value > 0 ? "+" : "") + transpose_value);
+                    transposedSteps[0].style.display = "";
+                }
+            }
+        });
+                updateChords()
+    }
             } else {
                 const new_text = transpose_note(originalText.trim(), transpose_value);
                 el.textContent = new_text;

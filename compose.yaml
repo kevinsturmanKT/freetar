@@ -1,0 +1,11 @@
+services:
+  app:
+    build:
+      context: .              # path to your Dockerfile
+      dockerfile: Dockerfile
+    image: freetar:local
+    container_name: myapp
+    restart: unless-stopped
+    ports:
+      - "22000:22000"
+    command: ["sleep", "infinity"]

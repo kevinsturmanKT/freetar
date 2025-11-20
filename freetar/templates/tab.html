@@ -191,19 +191,19 @@
 
         const r = document.querySelector(':root');
 
-        let fontSize = localStorage.getItem("fontSize") || 1;
+        let fontSize = parseFloat(localStorage.getItem("fontSize")) || 1;
 
         r.style.setProperty('--chordlyrics-font-size', `${fontSize}em`);
 
         $("#font_bigger").click(() => {
             fontSize += 0.1;
-            localStorage.setItem("fontSize",fontSize);
+            localStorage.setItem("fontSize",parseFloat(fontSize));
             r.style.setProperty('--chordlyrics-font-size', `${fontSize}em`);
         })
 
         $("#font_smaller").click(() => {
             fontSize -= 0.1;
-            localStorage.setItem("fontSize",fontSize);
+            localStorage.setItem("fontSize",parseFloat(fontSize));
             r.style.setProperty('--chordlyrics-font-size', `${fontSize}em`);
         })
 

@@ -30,6 +30,68 @@ $(window).on("wheel touchmove", function() {
     pauseScrolling(SCROLL_DELAY_AFTER_USER_ACTION);
 });
 
+// Handle Page Up/Down keys from bluetooth pedal and Arrow keys for navigation
+$(document).on('keydown', function(e) {
+    const stickyHeader = document.querySelector('.StickyChords');
+    const headerHeight = stickyHeader ? stickyHeader.offsetHeight : 0;
+    
+    if (e.key === 'PageDown' || e.key === 'PageUp') {
+        e.preventDefault();
+        
+        const currentScroll = window.pageYOffset;
+        const viewportHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        const maxScroll = documentHeight - viewportHeight;
+        
+        if (e.key === 'PageDown') {
+            // Page Down: scroll viewport height minus header height with larger overlap
+            const scrollAmount = viewportHeight - headerHeight - 120; // 120px buffer for better overlap
+            const targetScroll = Math.min(currentScroll + scrollAmount, maxScroll - headerHeight);
+            window.scrollTo(0, Math.max(0, targetScroll));
+        } else if (e.key === 'PageUp') {
+            // Page Up: scroll up by viewport height minus header height with larger overlap
+            const scrollAmount = viewportHeight - headerHeight - 120; // 120px buffer for better overlap
+            const targetScroll = Math.max(currentScroll - scrollAmount, 0);
+            window.scrollTo(0, targetScroll);
+        }
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        
+        const headers = Array.from(document.querySelectorAll('.chordlyrics-header'));
+        if (headers.length === 0) return;
+        
+        const currentScroll = window.pageYOffset;
+        const viewportBottom = currentScroll + window.innerHeight;
+        
+        // Find the first visible or just-passed header
+        let currentHeaderIndex = 0;
+        for (let i = 0; i < headers.length; i++) {
+            const headerTop = headers[i].offsetTop;
+            if (headerTop > currentScroll + 100) { // Header is significantly below current position
+                currentHeaderIndex = Math.max(0, i - 1);
+                break;
+            }
+            currentHeaderIndex = i; // This header is at or above current position
+        }
+        
+        let targetIndex;
+        if (e.key === 'ArrowLeft') {
+            // Go to previous header
+            targetIndex = Math.max(0, currentHeaderIndex - 1);
+        } else {
+            // Go to next header
+            targetIndex = Math.min(headers.length - 1, currentHeaderIndex + 1);
+        }
+        
+        const targetHeader = headers[targetIndex];
+        const targetTop = targetHeader.offsetTop - headerHeight - 20; // 20px padding above header
+        window.scrollTo({
+            top: Math.max(0, targetTop),
+            behavior: 'smooth'
+        });
+    }
+});
+
 $('#scroll_speed_down').click(function () {
     // Increase the delay to slow down scroll
     scrollTimeout += 50;
@@ -62,7 +124,20 @@ $('#scroll_speed_up').click(function () {
 function pageScroll() {
     if (pausedForUserInteraction) { return; }
 
-    window.scrollBy(0, SCROLL_STEP_SIZE);
+    const stickyHeader = document.querySelector('.StickyChords');
+    const headerHeight = stickyHeader ? stickyHeader.offsetHeight : 0;
+    const currentScroll = window.pageYOffset;
+    const viewportHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+    
+    // Calculate how much we can scroll before hitting the bottom
+    const maxScroll = documentHeight - viewportHeight;
+    const targetScroll = Math.min(currentScroll + SCROLL_STEP_SIZE, maxScroll);
+    
+    // If we're near the bottom, account for header height to ensure content visibility
+    const adjustedTargetScroll = Math.min(targetScroll, maxScroll - headerHeight);
+    
+    window.scrollTo(0, adjustedTargetScroll);
 }
 
 // Sets up the `pageScroll` function to be called in a loop every

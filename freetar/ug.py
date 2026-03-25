@@ -117,7 +117,6 @@ class Search:
             if PROXY_URL:
                 url = f"{PROXY_URL}/search?page={page}&search_type=title&value={quote(value)}"
             resp = requests.get(url, headers={"User-Agent": USER_AGENT})
-            print(resp.content)
             resp.raise_for_status()
             bs = BeautifulSoup(resp.text, "html.parser")  # data can be None
             data = bs.find("div", {"class": "js-store"})  # KeyError

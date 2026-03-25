@@ -9,7 +9,22 @@ function request(url: string, method: string = "GET"): Promise<string> {
   return new Promise((resolve, reject) => {
     const req = https.request(
       url,
-      { method, headers: { "User-Agent": USER_AGENT, Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" } },
+      {
+        method,
+        headers: {
+          "User-Agent": USER_AGENT,
+          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9",
+          "Accept-Encoding": "gzip, deflate, br",
+          "Connection": "keep-alive",
+          "Upgrade-Insecure-Requests": "1",
+          "Sec-Fetch-Dest": "document",
+          "Sec-Fetch-Mode": "navigate",
+          "Sec-Fetch-Site": "none",
+          "Sec-Fetch-User": "?1",
+          "Cache-Control": "max-age=0",
+        },
+      },
       (res) => {
         let data = "";
         res.on("data", (chunk) => (data += chunk));
@@ -26,7 +41,7 @@ function request(url: string, method: string = "GET"): Promise<string> {
 }
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const path = event.rawPath;
+  const path = event.rawPath.replace(/^\/[^/]+/, ""); // Strip stage prefix (e.g., /prod)
   const query = event.rawQueryString;
 
   if (path.startsWith("/search")) {
